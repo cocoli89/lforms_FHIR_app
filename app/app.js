@@ -16,6 +16,10 @@ angular.module('lformsApp', [
         bindRoleForClick: false
       });
     }])
+    .controller('themeController', function ($scope) {
+      $scope.themeList = themeList; // see themeList.js
+      $scope.otherScopes = {};
+    })
     .config(['$routeProvider', '$locationProvider',
       function($routeProvider, $locationProvider) {
         $routeProvider
