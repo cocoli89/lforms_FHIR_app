@@ -133,6 +133,25 @@
         {
           "extension": [
             {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "{mm/dd/yyyy}"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://unitsofmeasure.org",
+                    "code": "{mm/dd/yyyy}",
+                    "display": "{mm/dd/yyyy}"
+                  }
+                ]
+              }
+            },
+            {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-initialExpression",
               "valueExpression": {
                 "description": "Birth date from patient resource",
@@ -300,6 +319,18 @@
                 "system": "http://unitsofmeasure.org",
                 "code": "[in_i]"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://unitsofmeasure.org",
+                    "code": "[in_i]",
+                    "display": "[in_i]"
+                  }
+                ]
+              }
             }
           ],
           "required": false,
@@ -312,7 +343,7 @@
             }
           ],
           "text": "Body height",
-          "type": "decimal"
+          "type": "string"
         },
         {
           "extension": [
@@ -321,6 +352,18 @@
               "valueCoding": {
                 "system": "http://unitsofmeasure.org",
                 "code": "kg"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://unitsofmeasure.org",
+                    "code": "kg",
+                    "display": "kg"
+                  }
+                ]
               }
             }
           ],
@@ -334,7 +377,7 @@
             }
           ],
           "text": "Weight",
-          "type": "decimal"
+          "type": "string"
         },
         {
           "extension": [
@@ -1228,6 +1271,20 @@
           ],
           "item": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://unitsofmeasure.org",
+                        "code": "{mm/dd/yyyy}",
+                        "display": "{mm/dd/yyyy}"
+                      }
+                    ]
+                  }
+                }
+              ],
               "required": false,
               "linkId": "/54114-4/54139-1/54124-3",
               "code": [
@@ -1251,11 +1308,15 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
-                  "valueCoding": {
-                    "system": "http://unitsofmeasure.org",
-                    "code": "a",
-                    "display": "year"
+                  "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://unitsofmeasure.org",
+                        "code": "a",
+                        "display": "a"
+                      }
+                    ]
                   }
                 }
               ],
