@@ -84,18 +84,6 @@
             "system": "http://unitsofmeasure.org",
             "code": "%"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "%",
-                "display": "%"
-              }
-            ]
-          }
         }
       ],
       "linkId": "/2710-2",
@@ -115,34 +103,19 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
           "valueCoding": {
-            "system": "http://unitsofmeasure.org",
-            "code": "lbs",
             "display": "lbs"
           }
         },
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
           "valueCoding": {
-            "system": "http://unitsofmeasure.org",
-            "code": "kgs",
             "display": "kgs"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-observationLinkPeriod",
-          "valueDuration": {
-            "value": "1",
-            "unit": "year",
-            "system": "http://ucum.org",
-            "code": "a"
           }
         }
       ],
       "initial": [{
         "valueQuantity": {
-          "unit": "lbs",
-          "system": "http://unitsofmeasure.org",
-          "code": "lbs"
+          "unit": "lbs"
         }
       }],
       "linkId": "/3141-9",
@@ -164,18 +137,6 @@
           "valueCoding": {
             "system": "http://unitsofmeasure.org",
             "code": "cm"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "cm",
-                "display": "cm"
-              }
-            ]
           }
         }
       ],
@@ -224,15 +185,6 @@
             "code": "m",
             "display": "meters"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-observationLinkPeriod",
-          "valueDuration": {
-            "value": "1",
-            "unit": "year",
-            "system": "http://ucum.org",
-            "code": "a"
-          }
         }
       ],
       "linkId": "/8302-2",
@@ -262,18 +214,6 @@
             "system": "http://unitsofmeasure.org",
             "code": "Cel"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "Cel",
-                "display": "Cel"
-              }
-            ]
-          }
         }
       ],
       "linkId": "/8310-5",
@@ -295,18 +235,6 @@
           "valueCoding": {
             "system": "http://unitsofmeasure.org",
             "code": "mm[Hg]"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "mm[Hg]",
-                "display": "mm[Hg]"
-              }
-            ]
           }
         }
       ],
@@ -330,18 +258,6 @@
             "system": "http://unitsofmeasure.org",
             "code": "mm[Hg]"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "mm[Hg]",
-                "display": "mm[Hg]"
-              }
-            ]
-          }
         }
       ],
       "linkId": "/8480-6",
@@ -363,18 +279,6 @@
           "valueCoding": {
             "system": "http://unitsofmeasure.org",
             "code": "{beats}/min"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "{beats}/min",
-                "display": "{beats}/min"
-              }
-            ]
           }
         }
       ],
@@ -398,18 +302,6 @@
             "system": "http://unitsofmeasure.org",
             "code": "{breaths}/min"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "{breaths}/min",
-                "display": "{breaths}/min"
-              }
-            ]
-          }
         }
       ],
       "linkId": "/9279-1",
@@ -432,18 +324,6 @@
             "system": "http://unitsofmeasure.org",
             "code": "m2"
           }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "m2",
-                "display": "m2"
-              }
-            ]
-          }
         }
       ],
       "linkId": "/3140-1",
@@ -465,18 +345,6 @@
           "valueCoding": {
             "system": "http://unitsofmeasure.org",
             "code": "kg/m2"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://unitsofmeasure.org",
-                "code": "kg/m2",
-                "display": "kg/m2"
-              }
-            ]
           }
         },
         {
