@@ -58,7 +58,7 @@ angular.module('lformsApp')
         $scope.uploader.onAfterAddingFile = function(item) {
           // clean up the form before assigning a new one for performance reasons related to AngularJS watches
           selectedFormData.setFormData(null);
-          $timeout(function() {removeMessages()});
+          $scope.$apply(function() {removeMessages()});
 
           var reader = new FileReader(); // Read from local file system.
           reader.onload = function(event) {
@@ -66,12 +66,7 @@ angular.module('lformsApp')
               var importedData = JSON.parse(event.target.result);
             }
             catch(e) {
-              // We're using $timeout in this function rather than
-              // $scope.$apply, because in Edge (but not Firefox or Chrome) an
-              // error was raised about $apply already being in
-              // progress.  $timeout will wait until the current digest cycle is
-              // over, and then will call $apply.
-              $timeout(function() {userMessages.error = e});
+              $scope.$apply(function() {userMessages.error = e});
             }
             if (importedData) {
               // if the imported data is in FHIR Questionnaire format
@@ -90,14 +85,14 @@ angular.module('lformsApp')
                       'Example 2:  http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire|3.5.0 '+
                       ' (for SDC Questionnaire version 3.5).</p>';
                     if (!fhirVersion) {
-                      $timeout(function() {
+                      $scope.$apply(function() {
                         userMessages.htmlError = '<p>Could not determine the '+
                         'FHIR version for this resource.  Please make sure it is '+
                         metaProfMsg;
                       });
                     }
                     else {
-                      $timeout(function() {
+                      $scope.$apply(function() {
                         userMessages.htmlWarning = '<p>Warning:  Assuming this '+
                         'resource is for FHIR version ' +fhirVersion+'.'+
                         'To avoid this warning, please make sure the FHIR version is '+
@@ -109,14 +104,14 @@ angular.module('lformsApp')
                   questionnaire = LForms.Util.convertFHIRQuestionnaireToLForms(importedData, fhirVersion);
                 }
                 catch (e) {
-                  $timeout(function() {userMessages.error = e});
+                  $scope.$apply(function() {userMessages.error = e});
                 }
                 if (questionnaire)
-                  $timeout(function() {selectedFormData.setFormData(new LFormsData(questionnaire))});
+                  $scope.$apply(selectedFormData.setFormData(new LFormsData(questionnaire)));
               }
               // in the internal LForms format
               else {
-                $timeout(function() {selectedFormData.setFormData(new LFormsData(importedData))});
+                $scope.$apply(selectedFormData.setFormData(new LFormsData(importedData)));
               }
             }
           };
