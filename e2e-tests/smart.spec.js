@@ -53,6 +53,14 @@ describe('SMART on FHIR connection', function () {
     util.deleteCurrentQR(); // clean up
   });
 
+  it('should provide data for observationLinkPeriod', function() {
+    util.uploadForm('R4/weight-height-questionnaire.json');
+    let height = element(by.id('/8302-2/1'));
+    browser.wait(EC.presenceOf(height), 2000);
+    browser.wait(EC.textToBePresentInElementValue(height, '64'), 2000);
+    expect(height.getAttribute('value')).toMatch(/^64\./);
+  });
+
 
   describe('Saved QuestionnaireResponses', function() {
     afterAll(function() {
@@ -170,8 +178,6 @@ describe('SMART on FHIR connection', function () {
       });
     });
 
-    /* The menu options for  Questionnaire and QR without extensions have been
-     * removed.
     describe('Questionnaire', function() {
       beforeAll(() => clickShowMenuItem('#show-q'));
       afterAll(()=>closeResDialog());
@@ -210,7 +216,6 @@ describe('SMART on FHIR connection', function () {
         browser.wait(EC.textToBePresentInElement(msgBody, '"reference": "Patient/'), 50);
       });
     });
-    */
 
     describe('SDC Questionnaire', function() {
       beforeAll(() => clickShowMenuItem('#show-sdc-q'));
