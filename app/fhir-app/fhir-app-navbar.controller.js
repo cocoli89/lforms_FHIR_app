@@ -294,10 +294,10 @@ angular.module('lformsApp')
         /**
          * Update the saved QuestionnaireResponse list when the data is returned
          */
-        $scope.$on('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', function(event, arg, error) {
+        $scope.$on('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', function(event, arg) {
           $scope.listSavedQR = [];
-          $scope.listSavedQRError = error;
-          if (!error && arg && arg.total > 0) {  // searchset bundle
+
+          if (arg && arg.total > 0) {  // searchset bundle
             for (var i=0, iLen=arg.entry.length; i< iLen; i++) {
               var qr = arg.entry[i].resource;
               if (qr.resourceType === "QuestionnaireResponse") {
@@ -346,18 +346,17 @@ angular.module('lformsApp')
 
             }
             $scope.processPagingLinks("QuestionnaireResponse", arg.link);
+            $scope.$apply();
             $('.spinner').hide();
           }
-          $scope.$apply();
         });
 
 
         /**
          * Update the Questionnaire list when the data is returned
          */
-        $scope.$on('LF_FHIR_QUESTIONNAIRE_LIST', function(event, arg, error) {
+        $scope.$on('LF_FHIR_QUESTIONNAIRE_LIST', function(event, arg) {
           $scope.listSavedQ = [];
-          $scope.listSavedQError = error;
           if (arg && arg.total > 0) {  // searchset bundle
             for (var i=0, iLen=arg.entry.length; i< iLen; i++) {
               var q = arg.entry[i].resource;
@@ -378,8 +377,8 @@ angular.module('lformsApp')
               });
             }
             $scope.processPagingLinks("Questionnaire", arg.link);
+            $scope.$apply();
           }
-          $scope.$apply();
           $('.spinner').hide();
         });
 
