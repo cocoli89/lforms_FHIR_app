@@ -4,8 +4,8 @@
  */
 angular.module('lformsApp')
     .controller('FhirAppCtrl', [
-        '$scope', '$timeout', '$http', '$location', '$mdDialog', 'fhirService', 'fhirServerConfig',
-        function ($scope, $timeout, $http, $location, $mdDialog, fhirService, fhirServerConfig) {
+        '$scope', '$timeout', '$http', '$location', '$mdDialog', 'fhirService',
+        function ($scope, $timeout, $http, $location, $mdDialog, fhirService) {
 
       /**
        *  Returns the current patient resource.
@@ -65,7 +65,7 @@ angular.module('lformsApp')
         // For now get the server from an URL parameter:
         var fhirServerURL = $location.search()['server'];
         if (fhirServerURL) {
-          setServerAndPickPatient({url: fhirServerURL});
+          setServerAndPickPatient(fhirServerURL);
         }
         else {
           $scope.showFHIRServerPicker();
@@ -78,21 +78,21 @@ angular.module('lformsApp')
        *  calls the given callback with a boolean indicating whether
        *  communication was successfully established.  If it was successful, a
        *  patient selection dialog will be opened.
-       * @param fhirServer configuration of the FHIR server
+       * @param serverURL the URL of the FHIR server
        * @param callback the function to call after the communication attempt.
        *  It will be passed a boolean to indicate whether the attempt was
        *  successful.
        */
-      function setServerAndPickPatient(fhirServer, callback) {
+      function setServerAndPickPatient(serverURL, callback) {
         $scope.showWaitMsg('Contacting FHIR server.  Please wait...');
-        fhirService.setNonSmartServer(fhirServer, function(success) {
+        fhirService.setNonSmartServer(serverURL, function(success) {
           if (callback)
             callback(success);
           if (success)
             $scope.showPatientPicker();
           else {
             $scope.showErrorMsg('Could not establish communication with the FHIR server at ' +
-                fhirServer.url+'.');
+              serverURL+'.');
           }
         });
       }
@@ -107,7 +107,7 @@ angular.module('lformsApp')
       $scope.establishFHIRContext = function() {
         var fhirServerURL = $location.search()['server'];
         if (fhirServerURL) {
-          setServerAndPickPatient({url:fhirServerURL});
+          setServerAndPickPatient(fhirServerURL);
         }
         else {
           if (!fhirService.getSmartConnection() && !fhirService.smartConnectionInProgress()) {
@@ -189,7 +189,7 @@ angular.module('lformsApp')
             // For some reason, calling JSON.stringify in the template does not
             // work-- nothing is output-- so pass in a separate variable here.
             $scope.resultDataJSON = JSON.stringify(resultData, null, 2);
-            $scope.serverBaseURL = fhirService.getServerServiceURL();
+            $scope.serverBaseURL = fhirService.getServerBaseURL();
             // close the popup without selecting a patient
             $scope.closeDialog = function () {
               $scope.selectedPatientInDialog = null;
@@ -216,11 +216,13 @@ angular.module('lformsApp')
           targetEvent: event,
           controller: function DialogController($scope, $mdDialog) {
             $scope.dialogTitle = "FHIR Server Needed";
-            var fhirServers = [];
-            fhirServerConfig.listFhirServers.map(function(fhirServer) {
-              fhirServers.push({text: fhirServer.url, serverConfig: fhirServer});
-            });
-            $scope.fhirServerListOpts = {listItems: fhirServers}
+            $scope.fhirServerListOpts = {listItems: [
+              // Note:  Options must be https, because the public server is https
+              {text: 'https://launch.smarthealthit.org/v/r3/fhir'},
+              {text: 'https://lforms-fhir.nlm.nih.gov/baseDstu3'},
+              {text: 'https://lforms-fhir.nlm.nih.gov/baseR4'}
+              // {text: 'http://test.fhir.org/r4'} // Grahame's https server requires OAuth
+            ]}
             // close the popup without selecting a patient
             $scope.closeDialog = function () {
               $scope.selectedServerInDialog = null;
@@ -229,8 +231,9 @@ angular.module('lformsApp')
 
             // close the popup and select a patient
             $scope.confirmAndCloseDialog = function () {
-              if ($scope.selectedServerInDialog)
-                setServerAndPickPatient($scope.selectedServerInDialog.serverConfig, function() {$mdDialog.hide()});
+              var serverURL = $scope.selectedServerInDialog && $scope.selectedServerInDialog.text;
+              if (serverURL)
+                setServerAndPickPatient(serverURL, function() {$mdDialog.hide()});
               $scope.selectedServerInDialog = null;
               $mdDialog.hide();
             };
