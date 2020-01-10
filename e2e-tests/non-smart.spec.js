@@ -4,18 +4,20 @@ let util = require('./util');
 /**
  *  Selects a patient from the patient dialog.
  */
-function pickPatient()  {
+function pickPatient(patientName)  {
+  if (!patientName)
+    patientName = 'Karen';
   var ptField = '.lf-patient-search input'
   browser.wait(EC.presenceOf($(ptField)), 20000);
-  $(ptField).sendKeys('karen');
-  browser.wait(EC.textToBePresentInElement($('md-virtual-repeat-container'), 'Karen'), 2000);
+  $(ptField).sendKeys(patientName);
+  browser.wait(EC.textToBePresentInElement($('md-virtual-repeat-container'), patientName), 2000);
   $(ptField).sendKeys(protractor.Key.ARROW_DOWN);
   $(ptField).sendKeys(protractor.Key.TAB);
   $('#btnOK').click();
   // Confirm patient info is in header
   var name = $('#ptName');
   browser.wait(EC.presenceOf(name), 5000);
-  browser.wait(EC.textToBePresentInElement(name, 'Karen'), 2000);
+  browser.wait(EC.textToBePresentInElement(name, patientName), 2000);
 }
 
 describe('Non-SMART connection to FHIR server', function() {
@@ -42,6 +44,7 @@ describe('Non-SMART connection to FHIR server', function() {
   });
 
   describe('Extracting observations', function() {
+
     it('should be able to accept a "server" parameter', function() {
       browser.get(mainPageURL+'?server=https://lforms-fhir.nlm.nih.gov/baseR4');
       pickPatient();
@@ -52,6 +55,7 @@ describe('Non-SMART connection to FHIR server', function() {
       var weightField = '#\\/29463-7\\/1';
       browser.wait(EC.presenceOf($(weightField)), 2000);
       $(weightField).click();
+      util.clearField($(weightField));
       $(weightField).sendKeys('50');
       let saveAs = $('#btn-save-as');
       saveAs.click();
@@ -74,7 +78,13 @@ describe('Non-SMART connection to FHIR server', function() {
       // Clear the field so we can check it fills in again
       var weightField = '#\\/29463-7\\/1';
       util.clearField($(weightField));
+
+      // open the saved q section
+      element(by.css("#heading-three a")).click();
+      //browser.wait(EC.presenceOf(element(by.css('#qList a.list-group-item:first-child')), 2000);
+
       util.pageObjects.firstSavedQ('Weight').click();
+
       let weight = $(weightField); // new copy of element
       browser.wait(EC.presenceOf(weight), 2000);
       browser.wait(EC.textToBePresentInElementValue(weight, '50'));
@@ -112,6 +122,8 @@ describe('Non-SMART connection to FHIR server', function() {
       util.pageObjects.firstSavedUSSGQ().click();
       browser.wait(EC.presenceOf($(familyMemberName)));
       expect($(familyMemberName).getAttribute('value')).toBe('');
+      // open the saved qr section
+      element(by.css("#heading-one a")).click();
       // Load the saved QR and check the value
       util.pageObjects.firstSavedQR().click();
       browser.wait(EC.presenceOf($(familyMemberName)));
@@ -125,21 +137,28 @@ describe('Non-SMART connection to FHIR server', function() {
       $(familyMemberName).sendKeys('aa');
       $('#btn-save').click();
       util.waitForSpinnerStopped();
+      // open the saved q section
+      element(by.css("#heading-three a")).click();
       // Load a blank questionnaire to clear the fields
       util.pageObjects.firstSavedUSSGQ().click();
       browser.wait(EC.presenceOf($(familyMemberName)));
       expect($(familyMemberName).getAttribute('value')).toBe('');
+      /// open the saved qr section
+      element(by.css("#heading-one a")).click();
       // Load the saved QR and check the value
       util.pageObjects.firstSavedQR().click();
       browser.wait(EC.presenceOf($(familyMemberName)));
       expect($(familyMemberName).getAttribute('value')).toBe('aa');
+      // open the saved q section
+      element(by.css("#heading-three a")).click();
       util.deleteCurrentQuestionnaire(); // Clean up uploaded form
     });
   });
 
 
   describe('Next & previous buttons in Questionnaire list', function() {
-    var firstQNameCSS = '#qList .list-group-item:nth-child(2) .form-name';
+    var firstQNameCSS = '#qList .list-group-item:nth-child(3)';
+
 
     it('should initially have a next button and a disabled previous button', function() {
       expect($('#prevQPage').getAttribute('disabled')).toBe('true');
@@ -148,13 +167,13 @@ describe('Non-SMART connection to FHIR server', function() {
 
     it('should have a working next button on the first page', function() {
       // Get the name of the first questionnaire in the list.
-      browser.wait(EC.presenceOf($(firstQNameCSS)), 20000);
-      $(firstQNameCSS).getText().then(function(origText) {
+      browser.wait(EC.presenceOf($(firstQNameCSS)), 2000);
+      $(firstQNameCSS).getAttribute('id').then(function(origId) {
         $('#nextQPage').click();
         // Wait for the text of the first item to be different
         browser.wait(function() {
-          return $(firstQNameCSS).getText().then(function(newText) {
-            return origText != newText;
+          return $(firstQNameCSS).getAttribute('id').then(function(newId) {
+            return origId != newId;
           }, function fail() {return false}); // "fail" handles stale element references
         }, 2000);
       });
@@ -162,16 +181,102 @@ describe('Non-SMART connection to FHIR server', function() {
 
     it('should have a working previous button on the second page', function() {
       // Get the name of the first questionnaire in the list.
-      $(firstQNameCSS).getText().then(function(origText) {
+      $(firstQNameCSS).getAttribute('id').then(function(origId) {
         $('#prevQPage').click();
         // Wait for the text of the first item to be different
         browser.wait(function() {
-          return $(firstQNameCSS).getText().then(function(newText) {
-            return origText != newText;
+          return $(firstQNameCSS).getAttribute('id').then(function(newId) {
+            return origId != newId;
           }, function fail() {return false}); // "fail" handles stale element references
         }, 2000);
       });
     });
 
   });
+
+  describe('Featured Questionnaires', function() {
+
+    describe('Non-SMART', function() {
+      it('should display a list of featured questionnaires when https://lforms-fhir.nlm.nih.gov/baseR4 is selected', function() {
+        browser.get(mainPageURL);
+        var urlField = '#fhirServerURL';
+        browser.wait(EC.presenceOf($(urlField)), 5000);
+        $(urlField).click();
+        util.sendKeys($(urlField), 'https://lforms-fhir.nlm.nih.gov/baseR4');
+        $(urlField).sendKeys(protractor.Key.TAB);
+        $('#btnOK').click();
+        // Wait for dialog to close
+        browser.wait(EC.not(EC.presenceOf($('#btnOk'))), 5000);
+        // Wait for patient picker to open
+        pickPatient('Daniel');
+
+        let featuredTab = element(by.id('fqList'));
+        browser.wait(EC.presenceOf(featuredTab), 2000);
+
+      });
+
+      it('should display one of the questionnaires', function() {
+        // Continue with form loaded in previous tests
+        let firstFeaturedQ = element(by.id('54127-6-x'));
+        browser.wait(EC.presenceOf(firstFeaturedQ), 2000);
+
+        firstFeaturedQ.click();
+        let name = element(by.id('/54126-8/54125-0/1/1'));
+        browser.sleep(2000)
+        browser.wait(EC.presenceOf(name), 2000);
+      });
+
+      it('should display the 2nd questionnaires with pre-populated data', function() {
+        // Continue with form loaded in previous tests
+        let secondFeaturedQ = element(by.id('55418-8-x'));
+        browser.wait(EC.presenceOf(secondFeaturedQ), 2000);
+
+        secondFeaturedQ.click();
+        let weight = element(by.id('/8302-2/1'));
+        browser.sleep(2000)
+        browser.wait(EC.presenceOf(weight), 2000);
+        expect(weight.getAttribute('value')).toBe("70.1");
+      });
+
+      it('should not display a list of featured questionnaires when https://lforms-fhir.nlm.nih.gov/baseDstu3 is selected', function() {
+        browser.get(mainPageURL);
+        var urlField = '#fhirServerURL';
+        browser.wait(EC.presenceOf($(urlField)), 5000);
+        $(urlField).click();
+        util.sendKeys($(urlField), 'https://lforms-fhir.nlm.nih.gov/baseDstu3');
+        $(urlField).sendKeys(protractor.Key.TAB);
+        $('#btnOK').click();
+        // Wait for dialog to close
+        browser.wait(EC.not(EC.presenceOf($('#btnOk'))), 5000);
+        // Wait for patient picker to open
+        pickPatient();
+
+        let featuredTab = element(by.id('fqList'));
+        browser.wait(EC.not(EC.presenceOf(featuredTab)), 5000);
+
+      });
+
+      it('should be able to accept a "server" parameter', function() {
+        browser.get(mainPageURL+'?server=https://lforms-fhir.nlm.nih.gov/baseR4');
+        pickPatient();
+      });
+
+      it('should display a list of featured questionnaires when https://lforms-fhir.nlm.nih.gov/baseR4 is provided through the "server" parameter', function() {
+        browser.get(mainPageURL+'?server=https://lforms-fhir.nlm.nih.gov/baseR4');
+        pickPatient();
+        let featuredTab = element(by.id('fqList'));
+        browser.wait(EC.presenceOf(featuredTab), 2000);
+      });
+
+      it('should NOT display a list of featured questionnaires when https://lforms-fhir.nlm.nih.gov/baseDstu3 is provided through the "server" parameter', function() {
+        browser.get(mainPageURL+'?server=https://lforms-fhir.nlm.nih.gov/baseDstu3');
+        pickPatient();
+        let featuredTab = element(by.id('fqList'));
+        browser.wait(EC.not(EC.presenceOf(featuredTab)), 5000);
+      });
+
+    });
+
+  });
+
 });
