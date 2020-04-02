@@ -36,28 +36,42 @@
       "valueExpression" : {
         "name": "weightQuantity",
         "language": "text/fhirpath",
-        "expression": "%resource.item.where(linkId='/3141-9').answer.value"
+        "expression": "%resource.item.where(linkId='/3141-9').answer.valueQuantity"
       }
     }, {
       "url" : "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression" : {
         "name": "weight",
         "language": "text/fhirpath",
-        "expression": "%weightQuantity.toQuantity('kg').value"
+        "expression": "iif(%weightQuantity.unit='lbs', %weightQuantity.value*0.45359237, iif(%weightQuantity.unit='kgs', %weightQuantity.value, {}))"
       }
     }, {
       "url" : "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression" : {
         "name": "heightQuantity",
         "language": "text/fhirpath",
-        "expression": "%resource.item.where(linkId='/8302-2').answer.value"
+        "expression": "%resource.item.where(linkId='/8302-2').answer.valueQuantity"
+      }
+    }, {
+      "url" : "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression" : {
+        "name": "hNum",
+        "language": "text/fhirpath",
+        "expression": "%heightQuantity.value"
+      }
+    }, {
+      "url" : "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression" : {
+        "name": "hUnit",
+        "language": "text/fhirpath",
+        "expression": "%heightQuantity.unit"
       }
     }, {
       "url" : "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression" : {
         "name": "height",
         "language": "text/fhirpath",
-        "expression": "%heightQuantity.toQuantity('m').value"
+        "expression": "iif(%hUnit='inches', %hNum*0.0254, iif(%hUnit='feet', %hNum*0.3048, iif(%hUnit='centimeters', %hNum*0.01, iif(%hUnit='meters', %hNum, {}))))"
       }
     }
   ],
@@ -89,16 +103,12 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
           "valueCoding": {
-            "system": "http://unitsofmeasure.org",
-            "code": "[lb_av]",
             "display": "lbs"
           }
         },
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
           "valueCoding": {
-            "system": "http://unitsofmeasure.org",
-            "code": "kg",
             "display": "kgs"
           }
         },
@@ -114,8 +124,7 @@
       ],
       "initial": [{
         "valueQuantity": {
-          "system": "http://unitsofmeasure.org",
-          "code": "[lb_av]"
+          "unit": "lbs"
         }
       }],
       "linkId": "/3141-9",
