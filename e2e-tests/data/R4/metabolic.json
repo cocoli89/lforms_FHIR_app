@@ -1,6 +1,5 @@
 {
   "name": "Comprehensive metabolic 1998 panel",
-  "id": "24322-0-x",
   "code": [
     {
       "system": "http://loinc.org",
@@ -41,7 +40,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -71,7 +70,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -101,7 +100,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -131,7 +130,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -161,7 +160,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -196,7 +195,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -232,7 +231,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -273,7 +272,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -303,7 +302,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -333,7 +332,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -363,7 +362,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -393,7 +392,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -423,7 +422,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"

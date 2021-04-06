@@ -1,6 +1,5 @@
 {
   "resourceType": "Questionnaire",
-  "id": "55418-8-x",
   "status": "draft",
   "date": "2018-09-12T18:03:40-04:00",
   "meta": {
@@ -9,7 +8,7 @@
     ],
     "tag": [
       {
-        "code": "lformsVersion: 25.0.0"
+        "code": "lformsVersion: 28.0.0"
       }
     ]
   },
@@ -38,7 +37,7 @@
       "valueExpression": {
         "name": "weight",
         "language": "text/fhirpath",
-        "expression": "%resource.item.where(linkId='/29463-7').answer.value"
+        "expression": "%resource.item.where(linkId='/29463-7').answer.valueDecimal"
       }
     },
     {
@@ -46,7 +45,7 @@
       "valueExpression": {
         "name": "height",
         "language": "text/fhirpath",
-        "expression": "%resource.item.where(linkId='/8302-2').answer.value*0.0254"
+        "expression": "%resource.item.where(linkId='/8302-2').answer.valueDecimal*0.0254"
       }
     }
   ],
@@ -63,11 +62,15 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": 1,
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
           }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+          "valueBoolean": true
         }
       ],
       "required": false,
@@ -145,11 +148,15 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": 1,
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
           }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+          "valueBoolean": true
         }
       ],
       "required": false,

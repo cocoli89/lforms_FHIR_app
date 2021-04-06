@@ -1,6 +1,5 @@
 {
   "resourceType": "Questionnaire",
-  "id": "44249-1-x",
   "status": "draft",
   "meta": {
     "profile": [
@@ -55,7 +54,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -162,7 +161,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -269,7 +268,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -307,7 +306,7 @@
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix",
-              "valueString": 1
+              "valueString": "1"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
@@ -376,7 +375,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -483,7 +482,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -590,7 +589,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -697,7 +696,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -804,7 +803,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -907,7 +906,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -1110,7 +1109,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"
@@ -1158,7 +1157,7 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationLinkPeriod",
           "valueDuration": {
-            "value": 100,
+            "value": "1",
             "unit": "year",
             "system": "http://unitsofmeasure.org",
             "code": "a"

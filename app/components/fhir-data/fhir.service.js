@@ -4,16 +4,16 @@ fb.service('fhirService', [
   '$q',
   '$http',
   '$window',
-  '$timeout',
   'fhirServerConfig',
-  function($rootScope, $q, $http, $window, $timeout, fhirServerConfig) {
-    "use strict";
+  function($rootScope, $q, $http, $window, fhirServerConfig) {
     var thisService = this;
 
     // Currently selected patient
     thisService.currentPatient = null;
 
-    // the fhir server connection (a fhirclient/client-js instance)
+    // smart on fhir connection
+    thisService.connection = null;
+    // the fhir api handler
     thisService.fhir = null;
 
     // Current Questionnaire resource
@@ -34,17 +34,16 @@ fb.service('fhirService', [
      *  of the connection attempt.
      */
     thisService.requestSmartConnection = function(callback) {
-      thisService.fhir = null;
+      thisService.connection = null;
       if (!thisService._connectionInProgress) {
         thisService._connectionInProgress = true;
-        FHIR.oauth2.ready().then(function(smart) {
+        FHIR.oauth2.ready(function(smart) {
           thisService.setSmartConnection(smart);
           thisService._connectionInProgress = false;
           callback(true);
-        }).catch(function(e) {console.error(e); callback(false)});
+        }, function() {callback(false)});
       }
     };
-
 
     /**
      *  Returns true if the smart connection has been requested and is in
@@ -56,20 +55,26 @@ fb.service('fhirService', [
 
 
     /**
-     *  Returns the featured questionnaire list for the currnet FHIR server.
-     */
-    thisService.getFeaturedQs = function() {
-      return thisService._featuredQs;
-    };
-
-
-    /**
      * Set the smart on fhir connection
      * @param connection a connection to smart on fhir service
      */
     thisService.setSmartConnection = function(connection) {
-      thisService.fhir = connection;
-      LForms.Util.setFHIRContext(connection);
+      thisService.connection = connection;
+      thisService.fhir = connection.patient.api;
+      //thisService.fhir = connection.api;
+      LForms.Util.setFHIRContext({
+        getCurrent:  function(typeList, callback) {
+          var rtn = null;
+          if (typeList.indexOf('Patient') >= 0) {
+            connection.patient.read().then(function(patientRes) {
+              callback(patientRes);
+            });
+          }
+        },
+        getFHIRAPI: function() {
+          return thisService.fhir;
+        }
+      });
 
       // Retrieve the fhir version
       // For some reason setSmartConnection gets called multiple times on page load.
@@ -78,13 +83,14 @@ fb.service('fhirService', [
       });
 
       // Check local configuration if there is matching one
-      var serviceUrl = thisService.getServerServiceURL();
+      var serviceUrl = thisService.getSmartConnection().server.serviceUrl;
       var matchedServer = fhirServerConfig.listFhirServers.find(function(config) {
         return config.smartServiceUrl === serviceUrl;
       });
-      thisService._featuredQs = matchedServer ?
-        matchedServer.featuredQuestionnaires : null;
-      $rootScope.$broadcast('LF_FHIR_SERVER_SELECTED');
+      if (matchedServer) {
+        $rootScope.$broadcast('LF_FHIR_SERVER_SELECTED', {fhirConfig: matchedServer});
+      }
+
     };
 
 
@@ -96,8 +102,20 @@ fb.service('fhirService', [
      */
     thisService.setNonSmartServer = function(fhirServer, commCallback) {
       try {
-        thisService.fhir = FHIR.client(fhirServer.url);
-        LForms.Util.setFHIRContext(thisService.fhir);
+        thisService.connection = {server: {serviceUrl: fhirServer.url}};
+        thisService.fhir = FHIR.client({serviceUrl: fhirServer.url}).api;
+        thisService.nonSmartContext = {
+          baseURL: fhirServer.url,
+          getCurrent: function(typeList, callback) {
+            if (typeList.indexOf('Patient') >= 0) {
+              setTimeout(function() {callback(thisService.currentPatient)});
+            }
+          },
+          getFHIRAPI: function() {
+            return thisService.fhir;
+          }
+        };
+        LForms.Util.setFHIRContext(thisService.nonSmartContext);
         // Retrieve the fhir version
         LForms.Util.getServerFHIRReleaseID(function(releaseID) {
           if (releaseID !== undefined) {
@@ -112,10 +130,12 @@ fb.service('fhirService', [
         var matchedServer = fhirServerConfig.listFhirServers.find(function(config) {
           return config.url === fhirServer.url;
         });
-        if (matchedServer)
-          fhirServer = matchedServer;
-        thisService._featuredQs = fhirServer.featuredQuestionnaires;
-        $rootScope.$broadcast('LF_FHIR_SERVER_SELECTED');
+        if (matchedServer) {
+          $rootScope.$broadcast('LF_FHIR_SERVER_SELECTED', {fhirConfig: matchedServer});
+        }
+        else {
+          $rootScope.$broadcast('LF_FHIR_SERVER_SELECTED', {fhirConfig: fhirServer});
+        }
       }
       catch (e) {
         commCallback(false);
@@ -125,25 +145,12 @@ fb.service('fhirService', [
 
 
     /**
-     *  Updates the non-smart connection to know what the currently selected
-     *  patient is.  This assumes setNonSmartServer has already been called.
-     * @param patientId the id of the selected patient
-     */
-    thisService.setNonSmartServerPatient = function(patientId) {
-      var serverUrl = thisService.getServerServiceURL();
-      thisService.fhir = FHIR.client({serverUrl: serverUrl,
-        tokenResponse: { patient: patientId }});
-      LForms.Util.setFHIRContext(thisService.fhir);
-    };
-
-
-    /**
      * Get the smart on fhir connection (or, the non-smart connection if that is
      * what was used.)
      * @returns the smart on fhir connection or null
      */
     thisService.getSmartConnection = function() {
-      return thisService.fhir;
+      return thisService.connection;
     };
 
 
@@ -151,7 +158,7 @@ fb.service('fhirService', [
      *  Returns the service URL of the FHIR server the app is using.
      */
     thisService.getServerServiceURL = function() {
-      return thisService.getSmartConnection().state.serverUrl;
+      return thisService.getSmartConnection().server.serviceUrl;
     };
 
 
@@ -183,6 +190,14 @@ fb.service('fhirService', [
      */
     thisService.setCurrentPatient = function(patient) {
       thisService.currentPatient = patient;
+      if (thisService.nonSmartContext) {
+        // Update the FHIR connection to constrain resources to the patient.
+        // Following
+        // https://github.com/smart-on-fhir/client-js/blob/master/src/client/client.js
+        // for lack of documentation about "patient" in fhir.js.
+        thisService.fhir = FHIR.client({serviceUrl: thisService.nonSmartContext.baseURL,
+          patientId: patient.id}).patient.api
+      }
     };
 
 
@@ -244,23 +259,50 @@ fb.service('fhirService', [
      * Get FHIR pagination results using a link url in the current bundle
      *
      * @param resType - The FHIR bundle from which to extract the relation url.
-     * @param url - the URL for getting the next or previous page.
+     * @param relation - A string specifying the relation ('prev' | 'next')
      * @returns {Object} - FHIR resource bundle
      */
     thisService.getPage = function(resType, relation, url) {
       var baseUrl = $window.location.origin + '/fhir-api?';
       var url = url.replace(/^.*\/baseDstu3\?/, baseUrl);
 
-      thisService.fhir.request(url)
-        .then(function(response) {   // response is a searchset bundle
+      // if (resType === "QuestionnaireResponse") {
+      //   url += "?_sort=-authored";
+      // }
+      // else if  (resType === "Questionnaire") {
+      //   url += "?_sort=-date";
+      // }
+
+      var fn;
+      if(relation === 'next') {
+        fn = thisService.fhir.nextPage;
+      }
+      else if (relation === 'previous') {
+        relation = 'prev'; // fhir-client.js does not handle "previous"
+        fn = thisService.fhir.prevPage;
+      }
+
+      var bundle = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [
+          {
+            "relation": relation,
+            "url": url
+          }
+        ]
+      };
+
+      fn({bundle: bundle})
+        .then(function(response) {   // response.data is a searchset bundle
           if (resType === "Questionnaire") {
-            $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRE_LIST', response);
+            $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRE_LIST', response.data);
           }
           else if (resType === "QuestionnaireResponse") {
-            $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', response);
+            $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', response.data);
           }
           // else if (resType === "DiagnosticReport") {
-          //   $rootScope.$broadcast('LF_FHIR_DIAGNOSTICREPORT_LIST', response);
+          //   $rootScope.$broadcast('LF_FHIR_DIAGNOSTICREPORT_LIST', response.data);
           // }
         }, function(error) {
           console.log(error);
@@ -270,30 +312,6 @@ fb.service('fhirService', [
 
 
     /**
-     *  Build a FHIR search query and returns a promise with the result.
-     * @param searchConfig an object with the following sub-keys for configuring the search.
-     *  type: (required) the Resource type to search for
-     *  query: An object of key/value pairs for the query part of the URL to be constructed.
-     *  headers: An object containing HTTP headers to be added to the request.
-     */
-    function fhirSearch(searchConfig) {
-      var searchParams = new URLSearchParams();
-      if (searchConfig.query) {
-        var queryVars = searchConfig.query;
-        var queryVarKeys = Object.keys(queryVars);
-        var key;
-        for (var i=0, len=queryVarKeys.length; i<len; ++i) {
-          key = queryVarKeys[i];
-          searchParams.append(key, queryVars[key]);
-        }
-      }
-      return thisService.fhir.request({
-        url: searchConfig.type + '?' + searchParams,
-        headers: searchConfig.headers
-      });
-    }
-
-    /**
      * Search patients by name
      * Data returned through an angular broadcast event.
      * @param searchText the search text for patient names
@@ -301,7 +319,7 @@ fb.service('fhirService', [
      */
     thisService.searchPatientByName = function(searchText) {
       // md-autocomplete directive requires a promise to be returned
-      return fhirSearch({
+      return thisService.fhir.search({
         type: "Patient",
         query: {name: searchText},
         headers: {'Cache-Control': 'no-cache'}
@@ -309,9 +327,9 @@ fb.service('fhirService', [
         .then(function(response) {
           // process data for md-autocomplete
           var patientList = [];
-          if (response && response.entry) {
-            for (var i=0, iLen=response.entry.length; i<iLen; i++) {
-              var patient = response.entry[i].resource;
+          if (response && response.data.entry) {
+            for (var i=0, iLen=response.data.entry.length; i<iLen; i++) {
+              var patient = response.data.entry[i].resource;
               patientList.push({
                 name: thisService.getPatientName(patient),
                 gender: patient.gender,
@@ -342,7 +360,7 @@ fb.service('fhirService', [
      */
     thisService.searchQuestionnaire = function(searchText) {
       // md-autocomplete directive requires a promise to be returned
-      return fhirSearch({
+      return thisService.fhir.search({
         type: "Questionnaire",
         query: {title: searchText},
         headers: {'Cache-Control': 'no-cache'}
@@ -350,9 +368,9 @@ fb.service('fhirService', [
         .then(function(response) {
           // process data for md-autocomplete
           var qList = [];
-          if (response && response.entry) {
-            for (var i=0, iLen=response.entry.length; i<iLen; i++) {
-              var q = response.entry[i].resource;
+          if (response && response.data.entry) {
+            for (var i=0, iLen=response.data.entry.length; i<iLen; i++) {
+              var q = response.data.entry[i].resource;
               qList.push({
                 title: q.title,
                 status: q.status,
@@ -374,10 +392,10 @@ fb.service('fhirService', [
      * @param resId FHIR resource ID
      */
     thisService.getFhirResourceById = function(resType, resId) {
-      thisService.fhir.request(resType+'/'+encodeURIComponent(resId))
+      thisService.fhir.read({type: resType, id: resId})
         .then(function(response) {
           $rootScope.$broadcast('LF_FHIR_RESOURCE',
-            {resType: resType, resource: response, resId: resId});
+            {resType: resType, resource: response.data, resId: resId});
         }, function(error) {
           console.log(error);
         });
@@ -391,7 +409,7 @@ fb.service('fhirService', [
      * @param resId FHIR resource ID
      */
     thisService.getMergedQQR = function(resType, resId) {
-      fhirSearch(
+      thisService.fhir.search(
         {
           type: resType,
           query: {_id: resId, _include: 'QuestionnaireResponse:questionnaire'},
@@ -401,13 +419,13 @@ fb.service('fhirService', [
           var result = {qResource: null, qrResource: null};
 
           // not found, might be deleted from FHIR server by other apps
-          var resNum = response.entry.length;
+          var resNum = response.data.entry.length;
           if (resNum === 0) {
           }
           // one or two resource found
           else if (resNum === 1 || resNum === 2) {
             for (var i=0; i<resNum; i++) {
-              var res = response.entry[i].resource;
+              var res = response.data.entry[i].resource;
               if (res.resourceType === 'QuestionnaireResponse') {
                 result.qrResource = res;
               }
@@ -449,12 +467,12 @@ fb.service('fhirService', [
       thisService.setQRRefToQ(qrData, qData);
 
       // create QuestionnaireResponse
-      thisService.fhir.create(qrData).then(
+      thisService.fhir.create({resource: qrData}).then(
         function success(resp) {
           $rootScope.$broadcast('LF_FHIR_QR_CREATED',
             { resType: "QuestionnaireResponse",
-              resource: resp,
-              resId: resp.id,
+              resource: resp.data,
+              resId: resp.data.id,
               qResId: qData.id,
               qName: qData.name,
               extensionType: 'SDC'
@@ -533,15 +551,12 @@ fb.service('fhirService', [
         else
           qr.questionnaire = qRef;
 
-        thisService.fhir.request({url: '', method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(bundle)}).then(
-
+        thisService.fhir.transaction({bundle: bundle}).then(
           function success(resp) {
             _collectedResults.push(resp);
             reportResults();
             // Look through the bundle for the QuestionnaireResource ID
-            var entries = resp.entry;
+            var entries = resp.data.entry;
             var qrID = null;
             for (var i=0, len=entries.length; i<len && !qrID; ++i) {
               var entry = entries[i];
@@ -598,15 +613,15 @@ fb.service('fhirService', [
      */
     function createOrFindAndCall(q, withQuestionnaire) {
       function createQAndCall() {
-        thisService.fhir.create(q).then(function success(resp) {
+        thisService.fhir.create({resource: q}).then(function success(resp) {
           $rootScope.$broadcast('LF_FHIR_Q_CREATED',
             { resType: "Questionnaire",
-              resource: resp,
-              resId: resp.id,
+              resource: resp.data,
+              resId: resp.data.id,
               extensionType: 'SDC'
             });
-          thisService.currentQuestionnaire = resp;
-          withQuestionnaire(resp);
+          thisService.currentQuestionnaire = resp.data;
+          withQuestionnaire(resp.data);
         },
         function error(error) {
           _terminatingError = {resType: 'Questionnaire', operation: 'create', errInfo: error};
@@ -637,12 +652,12 @@ fb.service('fhirService', [
         createQAndCall();
       }
       else {
-        fhirSearch({
+        thisService.fhir.search({
           type: "Questionnaire",
           query: queryJson,
           headers: {'Cache-Control': 'no-cache'}
         }).then(function success(resp) {
-          var bundle = resp;
+          var bundle = resp.data;
           var count = (bundle.entry && bundle.entry.length) || 0;
           // found existing Questionnaires
           if (count > 0 ) {
@@ -685,10 +700,10 @@ fb.service('fhirService', [
      * @param resource the FHIR resource
      */
     thisService.updateFhirResource = function(resType, resource) {
-      thisService.fhir.update(resource)
+      thisService.fhir.update({resource: resource})
         .then(function success(response) {
           $rootScope.$broadcast('LF_FHIR_RESOURCE_UPDATED',
-            {resType: resType, resource: response, resId: resource.id});
+            {resType: resType, resource: response.data, resId: resource.id});
         },
         function error(response) {
           console.log(response);
@@ -714,7 +729,7 @@ fb.service('fhirService', [
           resId, reportSuccess);
       }
       else {
-        rtnPromise = fhirSearch({
+        rtnPromise = thisService.fhir.search({
           type: 'Observation',
           query: {
             'derived-from': 'QuestionnaireResponse/'+resId,
@@ -722,16 +737,16 @@ fb.service('fhirService', [
           headers: {
             'Cache-Control': 'no-cache'
           }
-        }).then(function(response) {   // response is a searchset bundle
+        }).then(function(response) {   // response.data is a searchset bundle
           var thenPromise;
-          var bundle = response;
+          var bundle = response.data;
           var entries = bundle.entry;
           if (entries && entries.length > 0) {
             var errorReported = false;
             var obsDelPromises = [];
             for (var i=0, len=entries.length; i<len; ++i) {
               var obsId = entries[i].resource.id;
-              obsDelPromises.push(thisService.fhir.delete('Observation/' + obsId));
+              obsDelPromises.push(thisService.fhir.delete({type: 'Observation', id: obsId}));
             }
             thenPromise = Promise.all(obsDelPromises).then(
               function success(response) {
@@ -767,7 +782,7 @@ fb.service('fhirService', [
      * @return a promise that resolves when all of the deletion is finished.
      */
     thisService.deleteQAndQRespAndObs = function(resId) {
-      return fhirSearch({
+      return thisService.fhir.search({
         type: 'QuestionnaireResponse',
         query: {
           'questionnaire': 'Questionnaire/'+resId,
@@ -775,9 +790,9 @@ fb.service('fhirService', [
         headers: {
           'Cache-Control': 'no-cache'
         }
-      }).then(function(response) {   // response is a searchset bundle
+      }).then(function(response) {   // response.data is a searchset bundle
         var thenPromise;
-        var bundle = response;
+        var bundle = response.data;
         var entries = bundle.entry;
         if (entries && entries.length > 0) {
           var pendingDeletions = 0;
@@ -818,9 +833,9 @@ fb.service('fhirService', [
     thisService.deleteFhirResource = function(resType, resId, reportSuccess) {
       if (reportSuccess === undefined)
         reportSuccess = true;
-      return thisService.fhir.delete(resType + "/" + resId)
+      return thisService.fhir.delete({type: resType, id: resId})
         .then(function success(response) {
-          // response === "OK"
+          // response.data === "OK"
           if (reportSuccess) {
             $rootScope.$broadcast('LF_FHIR_RESOURCE_DELETED',
               {resType: resType, resource: null, resId: resId});
@@ -840,7 +855,7 @@ fb.service('fhirService', [
      * not used
      */
     thisService.getDRAndObxBundle = function(resType, resId) {
-      fhirSearch({
+      thisService.fhir.search({
         type: 'DiagnosticReport',
         query: {
           _id: resId,
@@ -850,8 +865,8 @@ fb.service('fhirService', [
           'Cache-Control': 'no-cache'
         }
       })
-        .then(function(response) {   // response is a searchset bundle
-          $rootScope.$broadcast('LF_FHIR_DR_OBX_BUNDLE', response);
+        .then(function(response) {   // response.data is a searchset bundle
+          $rootScope.$broadcast('LF_FHIR_DR_OBX_BUNDLE', response.data);
         }, function(error) {
           console.log(error);
         });
@@ -868,8 +883,8 @@ fb.service('fhirService', [
         function success(resp) {
           $rootScope.$broadcast('LF_FHIR_BUNDLE_PROCESSED',
             { resType: "Bundle",
-              resource: resp,
-              resId: resp.id,
+              resource: resp.data,
+              resId: resp.data.id,
               qResId: qID,
               qName: qData.name,
               extensionType: extensionType
@@ -889,7 +904,7 @@ fb.service('fhirService', [
      * @param pId the current patient's ID
      */
     thisService.getAllQRByPatientId = function(pId) {
-      fhirSearch({
+      thisService.fhir.search({
         type: 'QuestionnaireResponse',
         query: {
           subject: 'Patient/' + pId,
@@ -901,8 +916,8 @@ fb.service('fhirService', [
           'Cache-Control': 'no-cache'
         }
       })
-        .then(function(response) {   // response is a searchset bundle
-          $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', response);
+        .then(function(response) {   // response.data is a searchset bundle
+          $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', response.data);
         }, function(error) {
           $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRERESPONSE_LIST', null, error);
           console.log(error);
@@ -937,7 +952,7 @@ fb.service('fhirService', [
      */
     thisService.getAllQ = function() {
 
-      fhirSearch({
+      thisService.fhir.search({
         type: 'Questionnaire',
         query: {
           _sort: '-_lastUpdated',
@@ -947,8 +962,8 @@ fb.service('fhirService', [
           'Cache-Control': 'no-cache'
         }
       })
-        .then(function(response) {   // response is a searchset bundle
-          $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRE_LIST', response);
+        .then(function(response) {   // response.data is a searchset bundle
+          $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRE_LIST', response.data);
         }, function(error) {
           $rootScope.$broadcast('LF_FHIR_QUESTIONNAIRE_LIST', null, error);
           console.log(error);
