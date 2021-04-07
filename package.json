@@ -1,6 +1,6 @@
 {
   "name": "lforms-fhir-app",
-  "version": "0.14.16",
+  "version": "1.2.3",
   "description": "A SMART on FHIR app for lforms",
   "repository": "https://github.com/lhncbc/lforms-fhir-app",
   "devDependencies": {
@@ -24,12 +24,12 @@
     "jasmine-core": "^3.2.1",
     "jasmine-spec-reporter": "^4.2.1",
     "jit-grunt": "^0.10.0",
-    "karma": "^5.0.5",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.1.0",
     "karma-jasmine": "^1.1.2",
     "karma-junit-reporter": "^1.2.0",
-    "protractor": "^5.4.3",
+    "protractor": "^7.0.0",
+    "superagent": "^6.1.0",
     "time-grunt": "^1.4.0",
     "tmp": "0.0.33",
     "uglify-js": "3.9.1"
@@ -38,14 +38,22 @@
     "postinstall": "bower install && npm run update-webdriver",
     "update-deps": "npm update",
     "postupdate-deps": "bower update",
-    "copy-npm-scripts": "mkdir -p app/lforms-updater; cp node_modules/lforms-updater/browser/updater.js* app/lforms-updater/",
+    "cp-lforms-updater": "mkdir -p app/lforms-updater; cp node_modules/lforms-updater/browser/updater.js* app/lforms-updater/",
+    "cp-fhirclient": "cp node_modules/fhirclient/build/fhir-client.js app",
+    "copy-npm-scripts": "npm run cp-lforms-updater && npm run cp-fhirclient",
     "build": "npm run copy-npm-scripts && grunt build",
-    "start": "echo 'Website starting at http://localhost:8000/lforms-fhir-app'; http-server -p 8000 -c-1 .",
+    "prestart": "echo 'Website starting at http://localhost:8000/lforms-fhir-app'",
+    "start": "http-server -s -p 8000 -c-1 .",
+    "prestart-local": "npm run prestart",
+    "start-local": "http-server -s -a localhost -p 8000 -c-1 .",
+    "prestart-dist": "echo 'Website starting at http://localhost:8000/lforms-fhir-app'",
     "start-dist": "http-server -p 8000 -c-1 dist",
     "update-webdriver": "node node_modules/protractor/bin/webdriver-manager update --versions.chrome $(google-chrome --version |awk '{print $NF}')",
-    "test": "protractor e2e-tests/protractor.conf.js"
+    "test": "npm run start-local & sleep 5; protractor e2e-tests/protractor.conf.js; s=$?; kill %1; exit $s",
+    "test-dist": "npm run start-dist & sleep 5; protractor e2e-tests/protractor.conf.js; s=$?; kill %1; exit $s"
   },
   "dependencies": {
-    "lforms-updater": "^25.0.1"
+    "fhirclient": "^2.3.11",
+    "lforms-updater": "^28.0.0"
   }
 }

@@ -3,6 +3,41 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
+## [1.2.3] - 2021-04-06
+### Changed
+- Updated NIH/NLM/LHC logo;
+- Removed favicon.ico
+
+## [1.2.2] - 2021-03-29
+### Fixed
+- Fixe a bug in FHIR delete operation that now takes a URL string
+  instead of an object.
+### Updated
+- Update fhirclient.js to 2.3.11
+
+## [1.2.1] - 2021-03-05
+### Fixed
+- Updated lforms to 28.1.4 and adjusted tests and test Questionnaires.
+
+## [1.2.0] - 2021-1-13
+### Changed
+- Updated lforms to 28.1.1.
+
+## [1.1.0] - 2020-12-15
+### Changed
+- Added starting HTTP server before running tests
+
+## [1.0.0] - 2020-12-04
+### Changed
+- Updated the SMART on FHIR client ('client-js', a.k.a. npm package fhirclient)
+  to version 2.  (See http://docs.smarthealthit.org/client-js).
+- Updated LForms to version 27.0.0.
+
+## [0.14.17] - 2020-11-12
+### Fixed
+- Replaced value[x] with value in FHIRPath expressions in tests where possible
+  (see e2e-tests/data/R4/*.json).
+
 ## [0.14.16] - 2020-09-08
 ### Changed
 - Updated LForms to version 25.1.5.
